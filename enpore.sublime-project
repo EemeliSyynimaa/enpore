@@ -1,0 +1,31 @@
+{
+    "folders":
+    [
+        {
+            "path": "."
+        }
+    ],
+    "settings":
+    {
+        "tab_size": 4
+    },
+    "build_systems":
+    [
+        {
+            "name": "win32",
+            "cmd": "${project_path}\\scripts\\build.bat",
+            "working_dir": "${project_path}\\scripts",
+            "variants":
+            [
+                {
+                    "name": "release",
+                    "cmd": "${project_path}\\scripts\\release.bat"
+                },
+                {
+                    "name": "debug",
+                    "cmd": "${project_path}\\scripts\\debug.bat"
+                }
+            ]
+        }
+    ]
+}
