@@ -15,4 +15,10 @@ typedef struct game_data_t
     render_buffer_t render_buffer;
 } game_data_t;
 
+typedef struct point_t
+{
+    float x;
+    float y;
+} point_t;
+
 #endif // GAME_H

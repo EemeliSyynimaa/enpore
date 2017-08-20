@@ -29,7 +29,7 @@ static void win32_resize_backbuffer(render_buffer_t *render_buffer, int width, i
 
         g_bitmap_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         g_bitmap_info.bmiHeader.biWidth = width;
-        g_bitmap_info.bmiHeader.biHeight = -height;
+        g_bitmap_info.bmiHeader.biHeight = height;
         g_bitmap_info.bmiHeader.biPlanes = 1;
         g_bitmap_info.bmiHeader.biBitCount = 32;
         g_bitmap_info.bmiHeader.biCompression = BI_RGB;
@@ -109,7 +109,7 @@ int CALLBACK WinMain(
     window_class.lpszClassName = "EnporeWindowClass";
     window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 
-    win32_resize_backbuffer(&g_game_data.render_buffer, 20, 15);
+    win32_resize_backbuffer(&g_game_data.render_buffer, 320, 160);
 
     if (RegisterClassA(&window_class))
     {
@@ -151,7 +151,7 @@ int CALLBACK WinMain(
                     DispatchMessageA(&message);
                 }
 
-                update_draw(&g_game_data);
+                en_game_draw(&g_game_data);
 
                 win32_update_draw(
                     &g_game_data.render_buffer,
