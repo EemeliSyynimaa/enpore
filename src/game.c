@@ -189,78 +189,39 @@ static void en_hexagon_fill(
 
 static void en_game_draw(game_data_t *game_data)
 {
-    en_v2i start;
-    en_v2i end;
-
-    en_v2i a, b, c;
-    a.x = 0;
-    a.y = 0;
-
-    b.x = 100;
-    b.y = 25;
-
-    c.x = 50;
-    c.y = 50;
-
-    start.x = game_data->render_buffer.width / 2;
-    start.y = game_data->render_buffer.height / 2;
-
-    end.x = start.x - 100;
-    end.y = start.y + 5;
-
     en_rect_fill(
         &game_data->render_buffer,
         0,
         0,
         game_data->render_buffer.width,
         game_data->render_buffer.height,
-        0x0000A2E8);
-
-    en_rect_fill(
-        &game_data->render_buffer,
-        5 * PIXEL_SIZE,
-        5 * PIXEL_SIZE,
-        PIXEL_SIZE,
-        PIXEL_SIZE,
-        0x000000FF);
-
-    en_line_draw(
-        &game_data->render_buffer,
-        start,
-        end,
-        0x00FF0000);
-
-    en_triangle_fill(
-        &game_data->render_buffer,
-        a, b, c, 
-        0x0000FF00,
-        0);
+        0x000d89c0);
 
     en_v2i hex_start_pos;
-    hex_start_pos.x = 32;
-    hex_start_pos.y = 432;
+    hex_start_pos.x = 58;
+    hex_start_pos.y = 64;
 
-    int size = 16;
+    int size = 64;
     float height_multiplier = 0.866f; // sqrt(3) / 2
     float width = 2 * size * height_multiplier;
     int half_width = (int)(width * 0.5f);
     int h_dist = (int)width;
     int v_dist = (int)(2 * size * (3.0 / 4.0f));
 
-    for (int y = 0; y < 5; y++)
+    for (int y = 0; y < 9; y++)
     {
-        for (int x = 0; x < 5; x++)
+        for (int x = 0; x < 14; x++)
         {
             en_v2i hex_pos = hex_start_pos;
 
             hex_pos.x += x * h_dist + (y % 2 ? half_width : 0);
-            hex_pos.y -= y * v_dist;
+            hex_pos.y += y * v_dist;
 
             en_hexagon_fill(
                 &game_data->render_buffer,
                 hex_pos,
-                size-1,
-                0x000000FF);
+                size-2,
+                0x0032b557);
         }
     }
 
