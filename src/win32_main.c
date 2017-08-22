@@ -36,14 +36,22 @@ static void win32_resize_backbuffer(render_buffer_t *render_buffer, int width, i
     }
 }
 
-static void win32_update_draw(render_buffer_t *render_buffer, int x, int y, int width, int height)
+static void win32_update_draw(render_buffer_t *render_buffer, int width, int height)
 {
+    int offset_x = 10;
+    int offset_y = 10;
+
+    PatBlt(g_hdc, 0, 0, width, offset_y, BLACKNESS);
+    PatBlt(g_hdc, 0, offset_y + render_buffer->height, width, height, BLACKNESS);
+    PatBlt(g_hdc, 0, 0, offset_x, height, BLACKNESS);
+    PatBlt(g_hdc, offset_x + render_buffer->width, 0, width, height, BLACKNESS);
+
     StretchDIBits(
         g_hdc,
-        x, 
-        y, 
-        width, 
-        height,
+        offset_x, 
+        offset_y, 
+        render_buffer->width, 
+        render_buffer->height,
         0, 
         0, 
         render_buffer->width, 
@@ -79,8 +87,6 @@ LRESULT CALLBACK WindowProc(
 
             win32_update_draw(
                 &g_game_data.render_buffer,
-                g_window_rect.left,
-                g_window_rect.top,
                 g_window_rect.right,
                 g_window_rect.bottom);
 
@@ -109,7 +115,7 @@ int CALLBACK WinMain(
     window_class.lpszClassName = "EnporeWindowClass";
     window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 
-    win32_resize_backbuffer(&g_game_data.render_buffer, 640, 480);
+    win32_resize_backbuffer(&g_game_data.render_buffer, 1600, 900);
 
     if (RegisterClassA(&window_class))
     {
@@ -120,8 +126,8 @@ int CALLBACK WinMain(
             WS_OVERLAPPEDWINDOW,
             CW_USEDEFAULT,
             CW_USEDEFAULT,
-            800,
-            600,
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
             0,
             0,
             hInstance,
@@ -155,8 +161,6 @@ int CALLBACK WinMain(
 
                 win32_update_draw(
                     &g_game_data.render_buffer,
-                    g_window_rect.left,
-                    g_window_rect.top,
                     g_window_rect.right,
                     g_window_rect.bottom);
             }
