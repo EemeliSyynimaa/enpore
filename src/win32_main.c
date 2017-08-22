@@ -109,7 +109,7 @@ int CALLBACK WinMain(
     window_class.lpszClassName = "EnporeWindowClass";
     window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 
-    win32_resize_backbuffer(&g_game_data.render_buffer, 320, 160);
+    win32_resize_backbuffer(&g_game_data.render_buffer, 320, 240);
 
     if (RegisterClassA(&window_class))
     {

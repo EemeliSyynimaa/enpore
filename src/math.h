@@ -5,7 +5,7 @@ typedef struct
 {
     float x;
     float y;
-} en_vec2_f;
+} en_v2f;
 
 inline float en_abs_f(float value)
 {
@@ -19,6 +19,13 @@ inline float en_abs_f(float value)
 inline void en_swap_f(float *a, float *b)
 {
     float temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+inline void en_swap_v2f(en_v2f *a, en_v2f *b)
+{
+    en_v2f temp = *a;
     *a = *b;
     *b = temp;
 }
