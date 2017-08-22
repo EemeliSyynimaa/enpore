@@ -109,7 +109,7 @@ int CALLBACK WinMain(
     window_class.lpszClassName = "EnporeWindowClass";
     window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 
-    win32_resize_backbuffer(&g_game_data.render_buffer, 320, 240);
+    win32_resize_backbuffer(&g_game_data.render_buffer, 640, 480);
 
     if (RegisterClassA(&window_class))
     {
@@ -120,8 +120,8 @@ int CALLBACK WinMain(
             WS_OVERLAPPEDWINDOW,
             CW_USEDEFAULT,
             CW_USEDEFAULT,
-            640,
-            480,
+            800,
+            600,
             0,
             0,
             hInstance,

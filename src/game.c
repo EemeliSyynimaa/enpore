@@ -35,50 +35,41 @@ static void en_pixel_fill(
 
 static void en_line_draw(
     render_buffer_t *render_buffer,
-    en_v2f start,
-    en_v2f end,
+    en_v2i start,
+    en_v2i end,
     int color)
 {
     int steep = 0;
 
-    if (en_abs_f(end.x - start.x) < en_abs_f(end.y - start.y))
+    if (en_abs_i(end.x - start.x) < en_abs_i(end.y - start.y))
     {
-        en_swap_f(&start.x, &start.y);
-        en_swap_f(&end.x, &end.y);
+        en_swap_i(&start.x, &start.y);
+        en_swap_i(&end.x, &end.y);
 
         steep = 1;
     }
 
     if (start.x > end.x)
     {
-        en_swap_f(&start.x, &end.x);
-        en_swap_f(&start.y, &end.y);
+        en_swap_v2i(&start, &end);
     }
 
-    float dx = end.x - start.x;
-    float dy = end.y - start.y;
-    float slope = en_abs_f(dy / dx);
-    float y = start.y;
+    int dx = end.x - start.x;
+    int dy = end.y - start.y;
+    int y = start.y;
+    int increment = (start.y > end.y) ? -1 : 1;
+    float slope = en_abs_f(dy / (float)dx);
     float error = 0.0f;
-    float increment = (start.y > end.y) ? -1.0f : 1.0f;
 
-    for (float x = start.x; x <= end.x; x++)
+    for (int x = start.x; x <= end.x; x++)
     {
         if (steep)
         {
-            en_pixel_fill(
-                render_buffer,
-                (int)y,
-                (int)x,
-                color);
+            en_pixel_fill(render_buffer, y, x, color);
         }
         else
         {
-            en_pixel_fill(
-                render_buffer,
-                (int)x,
-                (int)y,
-                color);
+            en_pixel_fill(render_buffer, x, y, color);
         }
 
         if ((error += slope) > 0.5f)
@@ -91,128 +82,131 @@ static void en_line_draw(
 
 static void en_triangle_fill(
     render_buffer_t *render_buffer,
-    en_v2f a,
-    en_v2f b,
-    en_v2f c,
+    en_v2i a,
+    en_v2i b,
+    en_v2i c,
     int color_fill,
     int color_border)
 {
-    if (a.y > b.y) en_swap_v2f(&a, &b);
-    if (a.y > c.y) en_swap_v2f(&a, &c);
-    if (b.y > c.y) en_swap_v2f(&b, &c);
+    if (a.y > b.y) en_swap_v2i(&a, &b);
+    if (a.y > c.y) en_swap_v2i(&a, &c);
+    if (b.y > c.y) en_swap_v2i(&b, &c);
 
-    float total_height = c.y - a.y;
+    int total_height = c.y - a.y;
 
-    for (float y = a.y; y < b.y; y++)
+    for (int y = a.y; y < b.y; y++)
     {
-        float segment_height = b.y - a.y;
-        float alpha = (y - a.y) / total_height;
-        float beta = (y - a.y) / segment_height;
+        int segment_height = b.y - a.y;
+        float alpha = (y - a.y) / (float)total_height;
+        float beta = (y - a.y) / (float)segment_height;
 
-        en_v2f ta;
-        ta.x = a.x + (c.x - a.x) * alpha;
-        ta.y = a.y + (c.y - a.y) * alpha;
+        en_v2i ta;
+        ta.x = (int)(a.x + (c.x - a.x) * alpha);
+        ta.y = (int)(a.y + (c.y - a.y) * alpha);
 
-        en_v2f tb;
-        tb.x = a.x + (b.x - a.x) * beta;
-        tb.y = a.y + (b.y - a.y) * beta;
+        en_v2i tb;
+        tb.x = (int)(a.x + (b.x - a.x) * beta);
+        tb.y = (int)(a.y + (b.y - a.y) * beta);
 
         if (ta.x > tb.x)
         {
-            en_swap_v2f(&ta, &tb);
+            en_swap_v2i(&ta, &tb);
         }
 
-        for (float j = ta.x; j <= tb.x + 1; j++)
+        for (int j = ta.x; j <= tb.x; j++)
         {
-            en_pixel_fill(render_buffer, (int)j, (int)y, color_fill);
+            en_pixel_fill(render_buffer, j, y, color_fill);
         }
     }
 
-    for (float y = b.y; y <= c.y; y++)
+    for (int y = b.y; y <= c.y; y++)
     {
-        float segment_height = c.y - b.y;
-        float alpha = (y - a.y) / total_height;
-        float beta = (y - b.y) / segment_height;
+        int segment_height = c.y - b.y;
+        float alpha = (y - a.y) / (float)total_height;
+        float beta = (y - b.y) / (float)segment_height;
 
-        en_v2f ta;
-        ta.x = a.x + (c.x - a.x) * alpha;
-        ta.y = a.y + (c.y - a.y) * alpha;
+        en_v2i ta;
+        ta.x = (int)(a.x + (c.x - a.x) * alpha);
+        ta.y = (int)(a.y + (c.y - a.y) * alpha);
 
-        en_v2f tb;
-        tb.x = b.x + (c.x - b.x) * beta;
-        tb.y = b.y + (c.y - b.y) * beta;
+        en_v2i tb;
+        tb.x = (int)(b.x + (c.x - b.x) * beta);
+        tb.y = (int)(b.y + (c.y - b.y) * beta);
 
         if (ta.x > tb.x)
         {
-            en_swap_v2f(&ta, &tb);
+            en_swap_v2i(&ta, &tb);
         }
 
-        for (float j = ta.x; j <= tb.x; j++)
+        for (int j = ta.x; j <= tb.x; j++)
         {
-            en_pixel_fill(render_buffer, (int)j, (int)y, color_fill);
+            en_pixel_fill(render_buffer, j, y, color_fill);
         }
     }
 
-    en_line_draw(render_buffer, a, b, color_border);
+/*    en_line_draw(render_buffer, a, b, color_border);
     en_line_draw(render_buffer, b, c, color_border);
-    en_line_draw(render_buffer, c, a, color_border);
+    en_line_draw(render_buffer, c, a, color_border);*/
+    (void)color_border;
 }
 
 static void en_hexagon_fill(
     render_buffer_t *render_buffer,
-    en_v2f center,
-    float size,
+    en_v2i center,
+    int size,
     int color)
 {
     float height_multiplier = 0.866f; // sqrt(3) / 2
     float width = 2 * size * height_multiplier;
+    int half_width = (int)(width * 0.5f);
+    int half_size = (int)(size * 0.5f);
 
     // Calculate points
-    en_v2f tl, tc, tr; // top left, top center, top right
-    en_v2f bl, bc, br; // bottom left, bottom center, bottom right
+    en_v2i tl, tc, tr; // top left, top center, top right
+    en_v2i bl, bc, br; // bottom left, bottom center, bottom right
 
     tl = tc = tr = center;
     bl = bc = br = center;
 
     tc.y += size;
-    tl.x -= width * 0.5f;
-    tl.y += size * 0.5f;
-    tr.x += width * 0.5f;
-    tr.y += size * 0.5f;
+    tl.x -= half_width;
+    tl.y += half_size;
+    tr.x += half_width;
+    tr.y += half_size;
 
     bc.y -= size;
-    bl.x -= width * 0.5f;
-    bl.y -= size * 0.5f;
-    br.x += width * 0.5f;
-    br.y -= size* 0.5f;
+    bl.x -= half_width;
+    bl.y -= half_size;
+    br.x += half_width;
+    br.y -= half_size;
 
     // Render triangles.
-    en_triangle_fill(render_buffer, tc, tl, bl, color, 0);
-    en_triangle_fill(render_buffer, tc, bl, bc, color, 0);
-    en_triangle_fill(render_buffer, tc, tr, bc, color, 0);
-    en_triangle_fill(render_buffer, tr, br, bc, color, 0);
+    en_triangle_fill(render_buffer, tc, tl, bl, color, color);
+    en_triangle_fill(render_buffer, tc, bl, bc, color, color);
+    en_triangle_fill(render_buffer, tc, tr, bc, color, color);
+    en_triangle_fill(render_buffer, tr, br, bc, color, color);
 }
 
 static void en_game_draw(game_data_t *game_data)
 {
-    en_v2f start;
-    en_v2f end;
+    en_v2i start;
+    en_v2i end;
 
-    en_v2f a, b, c;
-    a.x = 0.0f;
-    a.y = 0.0f;
+    en_v2i a, b, c;
+    a.x = 0;
+    a.y = 0;
 
-    b.x = 100.0f;
-    b.y = 25.0f;
+    b.x = 100;
+    b.y = 25;
 
-    c.x = 50.0f;
-    c.y = 50.0f;
+    c.x = 50;
+    c.y = 50;
 
-    start.x = game_data->render_buffer.width / 2.0f;
-    start.y = game_data->render_buffer.height / 2.0f;
+    start.x = game_data->render_buffer.width / 2;
+    start.y = game_data->render_buffer.height / 2;
 
-    end.x = start.x - 100.0f;
-    end.y = start.y + 5.0f;
+    end.x = start.x - 100;
+    end.y = start.y + 5;
 
     en_rect_fill(
         &game_data->render_buffer,
@@ -242,13 +236,32 @@ static void en_game_draw(game_data_t *game_data)
         0x0000FF00,
         0);
 
-    en_v2f center;
-    center.x = 200.0f;
-    center.y = 50.0f;
+    en_v2i hex_start_pos;
+    hex_start_pos.x = 32;
+    hex_start_pos.y = 432;
 
-    en_hexagon_fill(
-        &game_data->render_buffer,
-        center,
-        32.0f,
-        0x000000FF);
+    int size = 16;
+    float height_multiplier = 0.866f; // sqrt(3) / 2
+    float width = 2 * size * height_multiplier;
+    int half_width = (int)(width * 0.5f);
+    int h_dist = (int)width;
+    int v_dist = (int)(2 * size * (3.0 / 4.0f));
+
+    for (int y = 0; y < 5; y++)
+    {
+        for (int x = 0; x < 5; x++)
+        {
+            en_v2i hex_pos = hex_start_pos;
+
+            hex_pos.x += x * h_dist + (y % 2 ? half_width : 0);
+            hex_pos.y -= y * v_dist;
+
+            en_hexagon_fill(
+                &game_data->render_buffer,
+                hex_pos,
+                size-1,
+                0x000000FF);
+        }
+    }
+
 }
