@@ -140,6 +140,8 @@ int CALLBACK WinMain(
 
             ShowWindow(window, SW_SHOWDEFAULT);
 
+            en_game_init(&g_game_data);
+
             g_running = 1;
 
             while (g_running)
