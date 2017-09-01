@@ -22,6 +22,9 @@ typedef struct game_data_t
 {
     render_buffer_t render_buffer;
     tile_map_t tile_map;
+
+    int mouse_x;
+    int mouse_y;
 } game_data_t;
 
 typedef struct point_t

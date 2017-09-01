@@ -189,14 +189,17 @@ static void en_hexagon_fill(
 
 static int en_tile_map_get_tile(tile_map_t *tile_map, int x, int y)
 {
-    int result = tile_map->tiles[tile_map->width * y + x];
+    int index = tile_map->width * y + x + y / 2;
+    int result = tile_map->tiles[index];
 
     return result;
 }
 
 static void en_tile_map_set_tile(tile_map_t *tile_map, int x, int y, int value)
 {
-    tile_map->tiles[tile_map->width * y + x] = value;
+    int index = tile_map->width * y + x + y / 2;
+    
+    tile_map->tiles[index] = value;
 }
 
 static void en_game_init(game_data_t *game_data)
@@ -209,32 +212,23 @@ static void en_game_init(game_data_t *game_data)
     {
         for (int x = 0; x < game_data->tile_map.width; x++)
         {
-            en_tile_map_set_tile(&game_data->tile_map, x, y, x % 2);
+            game_data->tile_map.tiles[y * game_data->tile_map.width + x] = x % 2;
         }
     }
 }
 
-static en_v2i en_get_tile_offset_coordinates(int x, int y)
+static en_v2i en_convert_axial_to_screen(int x, int y, int size)
 {
     en_v2i result;
 
     result.x = x + (y - (en_abs_i(y) % 2)) / 2;
     result.y = y;
 
-    return result;
-}
-
-static en_v2i en_get_tile_screen_coordinates(tile_map_t *tile_map, int x, int y)
-{
-    en_v2i result;
-    result.x = x;
-    result.y = y;
-
     float height_multiplier = 0.866f; // sqrt(3) / 2
-    float width = 2 * tile_map->tile_size * height_multiplier;
+    float width = 2 * size * height_multiplier;
     int half_width = (int)(width * 0.5f);
     int h_dist = (int)width;
-    int v_dist = (int)(2 * tile_map->tile_size * (3.0 / 4.0f));
+    int v_dist = (int)(2 * size * (3.0 / 4.0f));
 
     result.x *= h_dist;
     result.y *= v_dist;
@@ -260,17 +254,22 @@ static void en_game_draw(game_data_t *game_data)
     {
         for (int x = 0; x < game_data->tile_map.width; x++)
         {
-            en_v2i screen_coords = en_get_tile_screen_coordinates(&game_data->tile_map, x, y);
+            int tile = game_data->tile_map.tiles[y * game_data->tile_map.width + x];
+            
+            en_v2i screen_coords = en_convert_axial_to_screen(x - y/2, y, game_data->tile_map.tile_size);
             int color = 0;
-            int tile = en_tile_map_get_tile(&game_data->tile_map, x, y);
 
-            if (tile)
+            if (tile == 0)
             {
                 color = 0x0032b557;
             }
-            else
+            else if (tile == 1)
             {
                 color = 0x0060D057;
+            }
+            else if (tile == 2)
+            {
+                color = 0x00FF5B8D;
             }
 
             en_hexagon_fill(
@@ -281,8 +280,7 @@ static void en_game_draw(game_data_t *game_data)
         }
     }
 
-    en_v2i player_position = en_get_tile_offset_coordinates(-2, 4);
-    player_position = en_get_tile_screen_coordinates(&game_data->tile_map, player_position.x, player_position.y);
+    en_v2i player_position = en_convert_axial_to_screen(8, 4, game_data->tile_map.tile_size);
 
     en_rect_fill(
         &game_data->render_buffer,
