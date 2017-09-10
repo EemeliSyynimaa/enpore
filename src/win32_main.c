@@ -1,5 +1,7 @@
 #include <Windows.h>
 #include "game.c"
+#include <stdio.h>
+#include <stdarg.h>
 
 int g_running = 0;
 
@@ -29,7 +31,7 @@ static void win32_resize_backbuffer(render_buffer_t *render_buffer, int width, i
 
         g_bitmap_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         g_bitmap_info.bmiHeader.biWidth = width;
-        g_bitmap_info.bmiHeader.biHeight = height;
+        g_bitmap_info.bmiHeader.biHeight = -height;
         g_bitmap_info.bmiHeader.biPlanes = 1;
         g_bitmap_info.bmiHeader.biBitCount = 32;
         g_bitmap_info.bmiHeader.biCompression = BI_RGB;
@@ -165,6 +167,39 @@ int CALLBACK WinMain(
                     &g_game_data.render_buffer,
                     g_window_rect.right,
                     g_window_rect.bottom);
+
+                POINT mouse;
+                
+                GetCursorPos(&mouse);
+                ScreenToClient(window, &mouse);
+
+                mouse.x -= 10;
+                mouse.y -= 10;
+
+                if (mouse.x < 0)
+                {
+                    mouse.x = 0;
+                }
+                else if (mouse.x > g_game_data.render_buffer.width)
+                {
+                    mouse.x = g_game_data.render_buffer.width;
+                }
+
+                if (mouse.y < 0)
+                {
+                    mouse.y = 0;
+                }
+                else if (mouse.y > g_game_data.render_buffer.height)
+                {
+                    mouse.y = g_game_data.render_buffer.height;
+                }
+                
+                g_game_data.mouse_x = mouse.x;
+                g_game_data.mouse_y = mouse.y;
+
+                char buffer[256];
+                sprintf_s(buffer, 256, "mouse x=%d y=%d\n", (int)mouse.x, (int)mouse.y);
+                OutputDebugString(buffer);
             }
         }
     }

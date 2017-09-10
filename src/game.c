@@ -5,20 +5,28 @@
 
 static void en_rect_fill(
     render_buffer_t *render_buffer, 
-    int rect_x, 
-    int rect_y, 
-    int rect_width, 
-    int rect_height,
-    int rect_color)
+    int x1, 
+    int y1, 
+    int x2, 
+    int y2,
+    int color)
 {
-    for (int y = 0; y < rect_height; y++)
+    if (x1 < render_buffer->width && y1 < render_buffer->height && x2 > 0 && y2 > 0)
     {
-        int* pixel_position = (int*)render_buffer->memory + (rect_y + y) * render_buffer->width + rect_x;
+        x1 = x1 < 0 ? 0 : x1;
+        y1 = y1 < 0 ? 0 : y1;
+        x2 = x2 > (render_buffer->width) ? render_buffer->width : x2;
+        y2 = y2 > (render_buffer->height) ? render_buffer->height : y2;
 
-        for (int x = 0; x < rect_width; x++, pixel_position++)
+        for (int y = y1; y < y2; y++)
         {
-            *pixel_position = rect_color;
-        }
+            int* pixel_position = (int*)render_buffer->memory + y * render_buffer->width + x1;
+
+            for (int x = x1; x < x2; x++, pixel_position++)
+            {
+                *pixel_position = color; 
+            }
+        }   
     }
 }
 
@@ -28,9 +36,10 @@ static void en_pixel_fill(
     int y,
     int color)
 {
-    int* pixel_position = (int*)render_buffer->memory + y * render_buffer->width + x;
-
-    *pixel_position = color;    
+    if (x >= 0 && x < render_buffer->width && y >= 0 && render_buffer->height)
+    {
+        *((int*)render_buffer->memory + y * render_buffer->width + x) = color;
+    }
 }
 
 static void en_line_draw(
@@ -221,7 +230,17 @@ static en_v2i en_convert_axial_to_screen(int x, int y, int size)
 {
     en_v2i result;
 
-    result.x = x + (y - (en_abs_i(y) % 2)) / 2;
+    float xf = (float)x;
+    float yf = (float)y;
+    float sizef = (float)size;
+    float sqrt3f = 1.7320508075688773f;
+
+    result.x = 50 + (int)(sizef * sqrt3f * (xf + yf / 2.0f));
+    result.y = 64 + (int)(sizef * 3.0f / 2.0f * yf);
+
+    return result;
+
+/*    result.x = x + (y - (en_abs_i(y) % 2)) / 2;
     result.y = y;
 
     float height_multiplier = 0.866f; // sqrt(3) / 2
@@ -234,8 +253,22 @@ static en_v2i en_convert_axial_to_screen(int x, int y, int size)
     result.y *= v_dist;
 
     // Add start marginal.
-    result.x += 58 + (y % 2 ? half_width : 0);
+    result.x += 64 + (y % 2 ? half_width : 0);
     result.y += 64;
+
+    return result;*/
+}
+
+static en_v2i en_convert_screen_to_axial(int x, int y, int size)
+{
+    en_v2i result;
+
+    float xf = (float)x;
+    float yf = (float)y;
+    float sizef = (float)size;
+
+    result.x = (int)((xf * 0.557f - yf / 3.0f) / sizef);
+    result.y = (int)(yf * 2.0f/3.0f / sizef); 
 
     return result;
 }
@@ -280,13 +313,17 @@ static void en_game_draw(game_data_t *game_data)
         }
     }
 
-    en_v2i player_position = en_convert_axial_to_screen(8, 4, game_data->tile_map.tile_size);
+    en_v2i mouse = en_convert_screen_to_axial(game_data->mouse_x, game_data->mouse_y, game_data->tile_map.tile_size);
+
+    en_v2i player_position = en_convert_axial_to_screen(mouse.x, mouse.y, game_data->tile_map.tile_size);
+
+    (void)player_position;
 
     en_rect_fill(
         &game_data->render_buffer,
-        player_position.x - 16,
-        player_position.y - 16,
-        32,
-        32,
+        game_data->mouse_x - 16,
+        game_data->mouse_y - 16,
+        game_data->mouse_x + 16,
+        game_data->mouse_y + 16,
         0xFFFFFFFF);
 }
