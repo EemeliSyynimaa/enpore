@@ -288,19 +288,6 @@ static en_v2i en_convert_screen_to_axial(int x, int y, int size)
     return result;
 }
 
-/*
-function cube_to_axial(cube):
-    var q = cube.x
-    var r = cube.z
-    return Hex(q, r)
-
-function axial_to_cube(hex):
-    var x = hex.q
-    var z = hex.r
-    var y = -x-z
-    return Cube(x, y, z)
-*/
-
 static void en_game_draw(game_data_t *game_data)
 {
     en_v2i tile_offset = { 55, 64 };
@@ -346,13 +333,10 @@ static void en_game_draw(game_data_t *game_data)
         }
     }
 
-    en_v2i test = en_convert_screen_to_axial(290-300, 265-132, 32);
-
-    (void)test;
-    en_v2i mouse_tile_map_pos = en_sub_v2i(game_data->mouse_pos, tile_offset);
-    en_v2i mouse = en_convert_screen_to_axial(mouse_tile_map_pos.x, mouse_tile_map_pos.y, game_data->tile_map.tile_size);
-    en_v2i player_position = en_convert_axial_to_screen(mouse.x, mouse.y, game_data->tile_map.tile_size);
-
+    en_v2i player_position;
+    player_position = en_sub_v2i(game_data->mouse_pos, tile_offset);
+    player_position = en_convert_screen_to_axial(player_position.x, player_position.y, game_data->tile_map.tile_size);
+    player_position = en_convert_axial_to_screen(player_position.x, player_position.y, game_data->tile_map.tile_size);
     player_position = en_sum_v2i(player_position, tile_offset);
 
     en_hexagon_fill(
