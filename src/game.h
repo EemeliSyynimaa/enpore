@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "math.h"
+
 typedef struct render_buffer_t
 {
     void *memory;
@@ -23,8 +25,7 @@ typedef struct game_data_t
     render_buffer_t render_buffer;
     tile_map_t tile_map;
 
-    int mouse_x;
-    int mouse_y;
+    en_v2i mouse_pos;
 } game_data_t;
 
 typedef struct point_t

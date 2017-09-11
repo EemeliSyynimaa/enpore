@@ -59,4 +59,33 @@ inline void en_swap_v2i(en_v2i *a, en_v2i *b)
     *b = temp;
 }
 
+inline int en_round(float value)
+{
+    int result;
+    
+    result = (int)(value + (value < 0 ? -0.5f : 0.5f));
+
+    return result;
+}
+
+inline en_v2i en_sum_v2i(en_v2i a, en_v2i b)
+{
+    en_v2i result;
+
+    result.x = a.x + b.x;
+    result.y = a.y + b.y;
+
+    return result;
+}
+
+inline en_v2i en_sub_v2i(en_v2i a, en_v2i b)
+{
+    en_v2i result;
+
+    result.x = a.x - b.x;
+    result.y = a.y - b.y;
+
+    return result;
+}
+
 #endif

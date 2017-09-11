@@ -1,8 +1,6 @@
 #include "game.h"
 #include "math.h"
 
-#define PIXEL_SIZE 16
-
 static void en_rect_fill(
     render_buffer_t *render_buffer, 
     int x1, 
@@ -36,7 +34,7 @@ static void en_pixel_fill(
     int y,
     int color)
 {
-    if (x >= 0 && x < render_buffer->width && y >= 0 && render_buffer->height)
+    if (x >= 0 && x < render_buffer->width && y >= 0 && y < render_buffer->height)
     {
         *((int*)render_buffer->memory + y * render_buffer->width + x) = color;
     }
@@ -233,48 +231,80 @@ static en_v2i en_convert_axial_to_screen(int x, int y, int size)
     float xf = (float)x;
     float yf = (float)y;
     float sizef = (float)size;
-    float sqrt3f = 1.7320508075688773f;
+    float sqrt3f = 1.7320508075688772935274463415059f;
 
-    result.x = 50 + (int)(sizef * sqrt3f * (xf + yf / 2.0f));
-    result.y = 64 + (int)(sizef * 3.0f / 2.0f * yf);
+    result.x = (int)(sizef * sqrt3f * (xf + yf / 2.0f));
+    result.y = (int)(sizef * 3.0f / 2.0f * yf);
 
     return result;
+}
 
-/*    result.x = x + (y - (en_abs_i(y) % 2)) / 2;
-    result.y = y;
+static en_v2i en_round_cube_coordinates(float x, float y, float z)
+{
+    en_v2i result;
 
-    float height_multiplier = 0.866f; // sqrt(3) / 2
-    float width = 2 * size * height_multiplier;
-    int half_width = (int)(width * 0.5f);
-    int h_dist = (int)width;
-    int v_dist = (int)(2 * size * (3.0 / 4.0f));
+    int rx = en_round(x);
+    int ry = en_round(y);
+    int rz = en_round(z);
 
-    result.x *= h_dist;
-    result.y *= v_dist;
+    float x_diff = en_abs_f((float)rx - x);
+    float y_diff = en_abs_f((float)ry - y);
+    float z_diff = en_abs_f((float)rz - z);
 
-    // Add start marginal.
-    result.x += 64 + (y % 2 ? half_width : 0);
-    result.y += 64;
+    if (x_diff > y_diff && x_diff > z_diff)
+    {
+        rx = -ry - rz;
+    }
+    else if (y_diff > z_diff)
+    {
+        ry = -rx - rz;
+    }
+    else
+    {
+        rz = -rx - ry;
+    }
 
-    return result;*/
+    result.x = rx;
+    result.y = rz;
+
+    return result;
 }
 
 static en_v2i en_convert_screen_to_axial(int x, int y, int size)
 {
     en_v2i result;
+    en_v2f fcoords;
 
     float xf = (float)x;
     float yf = (float)y;
     float sizef = (float)size;
+    float sqrt3f = 1.7320508075688772935274463415059f;
 
-    result.x = (int)((xf * 0.557f - yf / 3.0f) / sizef);
-    result.y = (int)(yf * 2.0f/3.0f / sizef); 
+    fcoords.x = (xf * sqrt3f / 3.0f - yf / 3.0f) / sizef;
+    fcoords.y = yf * 2.0f / 3.0f / sizef; 
+
+    result = en_round_cube_coordinates(fcoords.x, -fcoords.x - fcoords.y, fcoords.y);
 
     return result;
 }
 
+/*
+function cube_to_axial(cube):
+    var q = cube.x
+    var r = cube.z
+    return Hex(q, r)
+
+function axial_to_cube(hex):
+    var x = hex.q
+    var z = hex.r
+    var y = -x-z
+    return Cube(x, y, z)
+*/
+
 static void en_game_draw(game_data_t *game_data)
 {
+    en_v2i tile_offset = { 55, 64 };
+
     en_rect_fill(
         &game_data->render_buffer,
         0,
@@ -290,6 +320,9 @@ static void en_game_draw(game_data_t *game_data)
             int tile = game_data->tile_map.tiles[y * game_data->tile_map.width + x];
             
             en_v2i screen_coords = en_convert_axial_to_screen(x - y/2, y, game_data->tile_map.tile_size);
+
+            screen_coords = en_sum_v2i(screen_coords, tile_offset);
+
             int color = 0;
 
             if (tile == 0)
@@ -313,17 +346,18 @@ static void en_game_draw(game_data_t *game_data)
         }
     }
 
-    en_v2i mouse = en_convert_screen_to_axial(game_data->mouse_x, game_data->mouse_y, game_data->tile_map.tile_size);
+    en_v2i test = en_convert_screen_to_axial(290-300, 265-132, 32);
 
+    (void)test;
+    en_v2i mouse_tile_map_pos = en_sub_v2i(game_data->mouse_pos, tile_offset);
+    en_v2i mouse = en_convert_screen_to_axial(mouse_tile_map_pos.x, mouse_tile_map_pos.y, game_data->tile_map.tile_size);
     en_v2i player_position = en_convert_axial_to_screen(mouse.x, mouse.y, game_data->tile_map.tile_size);
 
-    (void)player_position;
+    player_position = en_sum_v2i(player_position, tile_offset);
 
-    en_rect_fill(
+    en_hexagon_fill(
         &game_data->render_buffer,
-        game_data->mouse_x - 16,
-        game_data->mouse_y - 16,
-        game_data->mouse_x + 16,
-        game_data->mouse_y + 16,
+        player_position,
+        game_data->tile_map.tile_size-2,
         0xFFFFFFFF);
 }

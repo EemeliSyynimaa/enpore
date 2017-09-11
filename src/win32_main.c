@@ -1,16 +1,11 @@
 #include <Windows.h>
 #include "game.c"
-#include <stdio.h>
-#include <stdarg.h>
 
 int g_running = 0;
-
 HDC g_hdc;
 
 BITMAPINFO g_bitmap_info;
-
 game_data_t g_game_data;
-
 RECT g_window_rect;
 
 static void win32_resize_backbuffer(render_buffer_t *render_buffer, int width, int height)
@@ -194,12 +189,8 @@ int CALLBACK WinMain(
                     mouse.y = g_game_data.render_buffer.height;
                 }
                 
-                g_game_data.mouse_x = mouse.x;
-                g_game_data.mouse_y = mouse.y;
-
-                char buffer[256];
-                sprintf_s(buffer, 256, "mouse x=%d y=%d\n", (int)mouse.x, (int)mouse.y);
-                OutputDebugString(buffer);
+                g_game_data.mouse_pos.x = mouse.x;
+                g_game_data.mouse_pos.y = mouse.y;
             }
         }
     }
