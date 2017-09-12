@@ -3,74 +3,74 @@
 
 typedef struct
 {
-    float x;
-    float y;
-} en_v2f;
+    f32 x;
+    f32 y;
+} v2f;
 
 typedef struct
 {
-    int x;
-    int y;
-} en_v2i;
+    s32 x;
+    s32 y;
+} v2i;
 
-inline int en_abs_i(int value)
+inline s32 abs_i(s32 value)
 {
-    int result = value;
+    s32 result = value;
 
     result *= (value < 0) ? -1 : 1;
 
     return result;
 }
 
-inline float en_abs_f(float value)
+inline f32 abs_f(f32 value)
 {
-    float result = value;
+    f32 result = value;
 
     result *= (value < 0) ? -1.0f : 1.0f;
 
     return result;
 }
 
-inline void en_swap_f(float *a, float *b)
+inline void swap_f(f32 *a, f32 *b)
 {
-    float temp = *a;
+    f32 temp = *a;
     *a = *b;
     *b = temp;
 }
 
-inline void en_swap_i(int *a, int *b)
+inline void swap_i(s32 *a, s32 *b)
 {
-    int temp = *a;
+    s32 temp = *a;
     *a = *b;
     *b = temp;
 }
 
-inline void en_swap_v2f(en_v2f *a, en_v2f *b)
+inline void swap_v2f(v2f *a, v2f *b)
 {
-    en_v2f temp = *a;
+    v2f temp = *a;
     *a = *b;
     *b = temp;
 }
 
-inline void en_swap_v2i(en_v2i *a, en_v2i *b)
+inline void swap_v2i(v2i *a, v2i *b)
 {
-    en_v2i temp = *a;
+    v2i temp = *a;
     *a = *b;
     *b = temp;
 }
 
-inline int en_round(float value)
+inline s32 round(f32 value)
 {
-    int result;
+    s32 result;
     
-    result = (int)(value + (value < 0 ? -0.5f : 0.5f));
+    result = (s32)(value + (value < 0 ? -0.5f : 0.5f));
 
     return result;
 }
 
-inline en_v2i en_sum_v2i(en_v2i a, en_v2i b)
+inline v2i sum_v2i(v2i a, v2i b)
 {
-    en_v2i result;
+    v2i result;
 
     result.x = a.x + b.x;
     result.y = a.y + b.y;
@@ -78,9 +78,9 @@ inline en_v2i en_sum_v2i(en_v2i a, en_v2i b)
     return result;
 }
 
-inline en_v2i en_sub_v2i(en_v2i a, en_v2i b)
+inline v2i sub_v2i(v2i a, v2i b)
 {
-    en_v2i result;
+    v2i result;
 
     result.x = a.x - b.x;
     result.y = a.y - b.y;

@@ -1,14 +1,14 @@
 #include <Windows.h>
 #include "game.c"
 
-int g_running = 0;
+s32 g_running = 0;
 HDC g_hdc;
 
 BITMAPINFO g_bitmap_info;
 game_data_t g_game_data;
 RECT g_window_rect;
 
-static void win32_resize_backbuffer(render_buffer_t *render_buffer, int width, int height)
+static void win32_resize_backbuffer(render_buffer_t *render_buffer, s32 width, s32 height)
 {
     if (render_buffer)
     {
@@ -33,10 +33,10 @@ static void win32_resize_backbuffer(render_buffer_t *render_buffer, int width, i
     }
 }
 
-static void win32_update_draw(render_buffer_t *render_buffer, int width, int height)
+static void win32_update_draw(render_buffer_t *render_buffer, s32 width, s32 height)
 {
-    int offset_x = 10;
-    int offset_y = 10;
+    s32 offset_x = 10;
+    s32 offset_y = 10;
 
     PatBlt(g_hdc, 0, 0, width, offset_y, BLACKNESS);
     PatBlt(g_hdc, 0, offset_y + render_buffer->height, width, height, BLACKNESS);
@@ -96,11 +96,11 @@ LRESULT CALLBACK WindowProc(
     return DefWindowProcA(hwnd, uMsg, wParam, lParam);
 }
 
-int CALLBACK WinMain(
+s32 CALLBACK WinMain(
     HINSTANCE hInstance,
     HINSTANCE hPrevInstance,
     LPSTR     lpCmdLine,
-    int       nCmdShow)
+    s32       nCmdShow)
 {
     (void)hPrevInstance;
     (void)lpCmdLine;
@@ -137,7 +137,7 @@ int CALLBACK WinMain(
 
             ShowWindow(window, SW_SHOWDEFAULT);
 
-            en_game_init(&g_game_data);
+            game_init(&g_game_data);
 
             g_running = 1;
 
@@ -156,7 +156,7 @@ int CALLBACK WinMain(
                     DispatchMessageA(&message);
                 }
 
-                en_game_draw(&g_game_data);
+                game_draw(&g_game_data);
 
                 win32_update_draw(
                     &g_game_data.render_buffer,
