@@ -24,7 +24,6 @@ typedef struct tile_map_t
 typedef struct hero_t
 {
     v2i position;
-    b32 selected;
 } hero_t;
 
 typedef struct game_data_t
@@ -33,6 +32,7 @@ typedef struct game_data_t
     tile_map_t tile_map;
     hero_t heroes[1];
     s32 hero_count;
+    s32 hero_selected;
     v2i mouse_pos;
     b32 mouse_last_frame;
     b32 mouse_this_frame;
