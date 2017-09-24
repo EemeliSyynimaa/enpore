@@ -193,7 +193,7 @@ static void hexagon_fill(
     triangle_fill(buffer, tr, br, bc, color, color);
 }
 
-static s32 tile_map_get_tile(tile_map_t *tile_map, s32 x, s32 y)
+static s32 tile_get(tile_map_t *tile_map, s32 x, s32 y)
 {
     s32 index = tile_map->width * y + x + y / 2;
     s32 result = tile_map->tiles[index];
@@ -201,10 +201,9 @@ static s32 tile_map_get_tile(tile_map_t *tile_map, s32 x, s32 y)
     return result;
 }
 
-static void tile_map_set_tile(tile_map_t *tile_map, s32 x, s32 y, s32 value)
+static void tile_set(tile_map_t *tile_map, s32 x, s32 y, s32 value)
 {
     s32 index = tile_map->width * y + x + y / 2;
-    
     tile_map->tiles[index] = value;
 }
 
@@ -218,9 +217,15 @@ static void game_init(game_data_t *game_data)
     {
         for (s32 x = 0; x < game_data->tile_map.width; x++)
         {
-            game_data->tile_map.tiles[y * game_data->tile_map.width + x] = x % 2;
+            s32 index = y * game_data->tile_map.width + x;
+            game_data->tile_map.tiles[index] = x % 2;
         }
     }
+
+    game_data->heroes[0].position.x = 3;
+    game_data->heroes[0].position.y = 6;
+    game_data->heroes[0].selected = 0;
+    game_data->hero_count = 1;
 }
 
 static v2i convert_axial_to_pixel(s32 x, s32 y, s32 size)
@@ -287,6 +292,13 @@ static v2i convert_pixel_to_axial(s32 x, s32 y, s32 size)
     return result;
 }
 
+static b32 mouse_clicked(game_data_t *game_data)
+{
+    b32 result = (game_data->mouse_last_frame == 1 && game_data->mouse_this_frame == 0);
+
+    return result;
+}
+
 static void game_draw(game_data_t *game_data)
 {
     v2i tile_offset = { 55, 64 };
@@ -303,7 +315,8 @@ static void game_draw(game_data_t *game_data)
     {
         for (s32 x = 0; x < game_data->tile_map.width; x++)
         {
-            s32 tile = game_data->tile_map.tiles[y * game_data->tile_map.width + x];
+            s32 index = y * game_data->tile_map.width + x;
+            s32 tile = game_data->tile_map.tiles[index];
             
             v2i screen_coords = convert_axial_to_pixel(x - y/2, y, game_data->tile_map.tile_size);
 
@@ -323,6 +336,10 @@ static void game_draw(game_data_t *game_data)
             {
                 color = 0x00FF5B8D;
             }
+            else if (tile == 3)
+            {
+                color = 0;
+            }
 
             hexagon_fill(
                 &game_data->render_buffer,
@@ -332,15 +349,39 @@ static void game_draw(game_data_t *game_data)
         }
     }
 
-    v2i player_position;
-    player_position = sub_v2i(game_data->mouse_pos, tile_offset);
-    player_position = convert_pixel_to_axial(player_position.x, player_position.y, game_data->tile_map.tile_size);
-    player_position = convert_axial_to_pixel(player_position.x, player_position.y, game_data->tile_map.tile_size);
-    player_position = sum_v2i(player_position, tile_offset);
+    v2i cursor_position;
+    cursor_position = sub_v2i(game_data->mouse_pos, tile_offset);
+    cursor_position = convert_pixel_to_axial(cursor_position.x, cursor_position.y, game_data->tile_map.tile_size);
+
+    for (s32 i = 0; i < game_data->hero_count; i++)
+    {
+        v2i hero_position = convert_axial_to_pixel(
+            game_data->heroes[i].position.x,
+            game_data->heroes[i].position.y,
+            game_data->tile_map.tile_size);
+
+        hero_position = sum_v2i(hero_position, tile_offset);
+
+        if (mouse_clicked(game_data) && equals_v2i(cursor_position, game_data->heroes[i].position))
+        {
+            game_data->heroes[i].selected = (game_data->heroes[i].selected == 0);
+        }
+
+        s32 color = game_data->heroes[i].selected ? 0xFFDD0000 : 0xFFC8C8C8;
+
+        hexagon_fill(
+            &game_data->render_buffer,
+            hero_position,
+            game_data->tile_map.tile_size / 2,
+            color);
+    }
+
+    cursor_position = convert_axial_to_pixel(cursor_position.x, cursor_position.y, game_data->tile_map.tile_size);
+    cursor_position = sum_v2i(cursor_position, tile_offset);
 
     hexagon_fill(
         &game_data->render_buffer,
-        player_position,
+        cursor_position,
         game_data->tile_map.tile_size-2,
-        0xFFFFFFFF);
+        0xDDFFFFFF);
 }

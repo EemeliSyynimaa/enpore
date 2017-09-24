@@ -88,4 +88,11 @@ inline v2i sub_v2i(v2i a, v2i b)
     return result;
 }
 
+inline b32 equals_v2i(v2i a, v2i b)
+{
+    b32 result = (a.x == b.x && a.y == b.y);
+
+    return result;
+}
+
 #endif

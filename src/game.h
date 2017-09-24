@@ -21,12 +21,21 @@ typedef struct tile_map_t
     s32 tile_size;
 } tile_map_t;
 
+typedef struct hero_t
+{
+    v2i position;
+    b32 selected;
+} hero_t;
+
 typedef struct game_data_t
 {
     render_buffer_t render_buffer;
     tile_map_t tile_map;
-
+    hero_t heroes[1];
+    s32 hero_count;
     v2i mouse_pos;
+    b32 mouse_last_frame;
+    b32 mouse_this_frame;
 } game_data_t;
 
 #endif // GAME_H

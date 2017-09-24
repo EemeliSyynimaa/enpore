@@ -188,6 +188,9 @@ s32 CALLBACK WinMain(
                 {
                     mouse.y = g_game_data.render_buffer.height;
                 }
+  
+                g_game_data.mouse_last_frame = g_game_data.mouse_this_frame;
+                g_game_data.mouse_this_frame = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
                 
                 g_game_data.mouse_pos.x = mouse.x;
                 g_game_data.mouse_pos.y = mouse.y;
