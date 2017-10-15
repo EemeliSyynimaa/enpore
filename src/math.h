@@ -31,6 +31,24 @@ inline f32 abs_f(f32 value)
     return result;
 }
 
+inline s32 max_i(s32 a, s32 b)
+{
+    s32 result;
+
+    result = a < b ? b : a;
+
+    return result;
+}
+
+inline s32 min_i(s32 a, s32 b)
+{
+    s32 result;
+
+    result = a < b ? a : b;
+
+    return result;
+}
+
 inline void swap_f(f32 *a, f32 *b)
 {
     f32 temp = *a;

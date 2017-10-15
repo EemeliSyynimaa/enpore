@@ -348,6 +348,42 @@ static void game_draw(game_data_t *game_data)
         }
     }
 
+    s32 move_range = 2;
+    v2i move_hexes[19] = { 0 };
+
+    if (game_data->hero_selected)
+    {
+        s32 hero_index = game_data->hero_selected - 1;
+        s32 index = 0;
+           
+        for (s32 y = -move_range; y <= move_range; y++)
+        {
+            for (s32 x = max_i(-move_range, -y - move_range); x <= min_i(move_range, -y + move_range); x++)
+            {
+                v2i position = game_data->heroes[hero_index].position;
+                position.x += x;
+                position.y += y;
+
+                move_hexes[index++] = position;
+
+                position = convert_axial_to_pixel(
+                    position.x,
+                    position.y,
+                    game_data->tile_map.tile_size);
+
+                position = sum_v2i(position, tile_offset);
+
+                s32 color = 0x777700FF;
+
+                hexagon_fill(
+                    &game_data->render_buffer,
+                    position,
+                    game_data->tile_map.tile_size - 4,
+                    color);
+            }
+        }
+    }
+
     v2i cursor_position;
     cursor_position = sub_v2i(game_data->mouse_pos, tile_offset);
     cursor_position = convert_pixel_to_axial(cursor_position.x, cursor_position.y, game_data->tile_map.tile_size);
@@ -356,7 +392,7 @@ static void game_draw(game_data_t *game_data)
     {
         if (game_data->hero_selected)
         {
-            int hero_index = game_data->hero_selected - 1;
+            s32 hero_index = game_data->hero_selected - 1;
 
             if (equals_v2i(cursor_position, game_data->heroes[hero_index].position))
             {
@@ -364,7 +400,21 @@ static void game_draw(game_data_t *game_data)
             }
             else
             {
-                game_data->heroes[hero_index].position = cursor_position;
+                b32 valid_hex_found = 0;
+                
+                for (s32 i = 0; i < 19; i++)
+                {
+                    if (equals_v2i(cursor_position, move_hexes[i]))
+                    {
+                        valid_hex_found = 1;
+                        break;
+                    }
+                }
+
+                if (valid_hex_found)
+                {
+                    game_data->heroes[hero_index].position = cursor_position;
+                }
             }
         }
         else
