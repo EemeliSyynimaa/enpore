@@ -167,7 +167,7 @@ static void hexagon_fill(
     s32 half_width = (s32)(width * 0.5f);
     s32 half_size = (s32)(size * 0.5f);
 
-    // Calculate poi32s
+    // Calculate points.
     v2i tl, tc, tr; // top left, top center, top right
     v2i bl, bc, br; // bottom left, bottom center, bottom right
 
