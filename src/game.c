@@ -1,4 +1,5 @@
 #include "game.h"
+#include "math.h"
 
 static void rect_fill(
     render_buffer_t *buffer, 

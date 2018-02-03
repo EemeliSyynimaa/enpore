@@ -2,7 +2,6 @@
 #define GAME_H
 
 #include "platform.h"
-#include "math.h"
 
 typedef struct render_buffer_t
 {

@@ -18,4 +18,16 @@ typedef uint64_t    u64;
 
 typedef int32_t     b32;
 
+typedef struct
+{
+    f32 x;
+    f32 y;
+} v2f;
+
+typedef struct
+{
+    s32 x;
+    s32 y;
+} v2i;
+
 #endif
