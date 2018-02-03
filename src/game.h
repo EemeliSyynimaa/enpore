@@ -14,7 +14,7 @@ typedef struct render_buffer_t
 
 typedef struct tile_map_t
 {
-    s32 tiles[126];
+    s32 tiles[350];
     s32 width;
     s32 height;
     s32 tile_size;

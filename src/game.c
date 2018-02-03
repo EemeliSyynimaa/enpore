@@ -210,8 +210,8 @@ static void tile_set(tile_map_t *tile_map, s32 x, s32 y, s32 value)
 
 static void game_init(game_data_t *game_data)
 {
-    game_data->tile_map.width = 14;
-    game_data->tile_map.height = 9;
+    game_data->tile_map.width = 25;
+    game_data->tile_map.height = 14;
     game_data->tile_map.tile_size = 64;
 
     for (s32 y = 0; y < game_data->tile_map.height; y++)
@@ -301,8 +301,6 @@ static b32 mouse_clicked(game_data_t *game_data)
 
 static void game_draw(game_data_t *game_data)
 {
-    v2i tile_offset = { 55, 64 };
-
     rect_fill(
         &game_data->render_buffer,
         0,
@@ -315,145 +313,28 @@ static void game_draw(game_data_t *game_data)
     {
         for (s32 x = 0; x < game_data->tile_map.width; x++)
         {
-            s32 index = y * game_data->tile_map.width + x;
-            s32 tile = game_data->tile_map.tiles[index];
-            
-            v2i screen_coords = convert_axial_to_pixel(x - y/2, y, game_data->tile_map.tile_size);
+            v2i tile;
+            tile.x = x * game_data->tile_map.tile_size;
+            tile.y = y * game_data->tile_map.tile_size;
 
-            screen_coords = sum_v2i(screen_coords, tile_offset);
+            s32 color;
 
-            s32 color = 0;
-
-            if (tile == 0)
+            if ((y % 2 && x % 2) || (!(y % 2) && !(x % 2)))
             {
-                color = 0x0032b557;
-            }
-            else if (tile == 1)
-            {
-                color = 0x0060D057;
-            }
-            else if (tile == 2)
-            {
-                color = 0x00FF5B8D;
-            }
-            else if (tile == 3)
-            {
-                color = 0;
-            }
-
-            hexagon_fill(
-                &game_data->render_buffer,
-                screen_coords,
-                game_data->tile_map.tile_size-2,
-                color);
-        }
-    }
-
-    s32 move_range = 2;
-    v2i move_hexes[19] = { 0 };
-
-    if (game_data->hero_selected)
-    {
-        s32 hero_index = game_data->hero_selected - 1;
-        s32 index = 0;
-           
-        for (s32 y = -move_range; y <= move_range; y++)
-        {
-            for (s32 x = max_i(-move_range, -y - move_range); x <= min_i(move_range, -y + move_range); x++)
-            {
-                v2i position = game_data->heroes[hero_index].position;
-                position.x += x;
-                position.y += y;
-
-                move_hexes[index++] = position;
-
-                position = convert_axial_to_pixel(
-                    position.x,
-                    position.y,
-                    game_data->tile_map.tile_size);
-
-                position = sum_v2i(position, tile_offset);
-
-                s32 color = 0x777700FF;
-
-                hexagon_fill(
-                    &game_data->render_buffer,
-                    position,
-                    game_data->tile_map.tile_size - 4,
-                    color);
-            }
-        }
-    }
-
-    v2i cursor_position;
-    cursor_position = sub_v2i(game_data->mouse_pos, tile_offset);
-    cursor_position = convert_pixel_to_axial(cursor_position.x, cursor_position.y, game_data->tile_map.tile_size);
-
-    if (mouse_clicked(game_data))
-    {
-        if (game_data->hero_selected)
-        {
-            s32 hero_index = game_data->hero_selected - 1;
-
-            if (equals_v2i(cursor_position, game_data->heroes[hero_index].position))
-            {
-                game_data->hero_selected = 0;
+                color = 0x295915;
             }
             else
             {
-                b32 valid_hex_found = 0;
-                
-                for (s32 i = 0; i < 19; i++)
-                {
-                    if (equals_v2i(cursor_position, move_hexes[i]))
-                    {
-                        valid_hex_found = 1;
-                        break;
-                    }
-                }
+                color = 0x306504;
+            }
 
-                if (valid_hex_found)
-                {
-                    game_data->heroes[hero_index].position = cursor_position;
-                }
-            }
-        }
-        else
-        {
-            for (s32 i = 0; i < game_data->hero_count; i++)
-            {
-                if (equals_v2i(cursor_position, game_data->heroes[i].position))
-                {
-                    game_data->hero_selected = i+1;
-                }
-            }
+            rect_fill(
+                &game_data->render_buffer,
+                tile.x,
+                tile.y,
+                tile.x + game_data->tile_map.tile_size,
+                tile.y + game_data->tile_map.tile_size,
+                color);
         }
     }
-
-    for (s32 i = 0; i < game_data->hero_count; i++)
-    {
-        v2i hero_position = convert_axial_to_pixel(
-            game_data->heroes[i].position.x,
-            game_data->heroes[i].position.y,
-            game_data->tile_map.tile_size);
-
-        hero_position = sum_v2i(hero_position, tile_offset);
-
-        s32 color = (game_data->hero_selected == i+1) ? 0xFFDD0000 : 0xFFC8C8C8;
-
-        hexagon_fill(
-            &game_data->render_buffer,
-            hero_position,
-            game_data->tile_map.tile_size / 2,
-            color);
-    }
-
-    cursor_position = convert_axial_to_pixel(cursor_position.x, cursor_position.y, game_data->tile_map.tile_size);
-    cursor_position = sum_v2i(cursor_position, tile_offset);
-
-    hexagon_fill(
-        &game_data->render_buffer,
-        cursor_position,
-        game_data->tile_map.tile_size-2,
-        0xDDFFFFFF);
 }
