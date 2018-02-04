@@ -13,8 +13,8 @@ static void rect_fill(
     {
         x1 = x1 < 0 ? 0 : x1;
         y1 = y1 < 0 ? 0 : y1;
-        x2 = x2 > (buffer->width) ? buffer->width : x2;
-        y2 = y2 > (buffer->height) ? buffer->height : y2;
+        x2 = x2 > buffer->width ? buffer->width : x2;
+        y2 = y2 > buffer->height ? buffer->height : y2;
 
         for (s32 y = y1; y < y2; y++)
         {
@@ -23,6 +23,60 @@ static void rect_fill(
             for (s32 x = x1; x < x2; x++, pixel_position++)
             {
                 *pixel_position = color; 
+            }
+        }   
+    }
+}
+
+static void bitmap_fill(
+    render_buffer_t *buffer,
+    s32 dest_x,
+    s32 dest_y,
+    s32 src_x1,
+    s32 src_y1,
+    s32 src_x2,
+    s32 src_y2,
+    bitmap_t *bitmap)
+{
+    s32 x1 = dest_x;
+    s32 y1 = dest_y;
+    s32 x2 = x1 + bitmap->width;
+    s32 y2 = y1 + bitmap->height;
+
+    if (x1 < buffer->width && y1 < buffer->height && x2 > 0 && y2 > 0)
+    {
+        if (x1 < 0)
+        {
+            src_x1 += x1;
+            x1 = 0;
+        }
+
+        if (y1 < 0)
+        {
+            src_y1 += y1;
+            y1 = 0;
+        }
+
+        if (x2 > buffer->width)
+        {
+            src_x2 -= x2 - buffer->width;
+            x2 = buffer->width;
+        }
+
+        if (y2 > buffer->height)
+        {
+            src_y2 -= y2 - buffer->height;
+            y2 = buffer->height;
+        }
+
+        for (s32 y = y1, j = src_y1; y < y2; y++, j++)
+        {
+            s32 *pixel_position = (s32*)buffer->memory + y * buffer->width + x1;
+            s32 *bitmap_position = (s32*)bitmap->data + j * bitmap->width + src_x1;
+
+            for (s32 x = x1; x < x2; x++, pixel_position++, bitmap_position++)
+            {
+                *pixel_position = *bitmap_position; 
             }
         }   
     }
@@ -337,4 +391,14 @@ static void game_draw(game_data_t *game_data)
                 color);
         }
     }
+
+    bitmap_fill(
+        &game_data->render_buffer,
+        800,
+        450,
+        0,
+        0,
+        game_data->bitmap.width,
+        game_data->bitmap.height,
+        &game_data->bitmap);
 }

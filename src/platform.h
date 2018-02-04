@@ -30,4 +30,11 @@ typedef struct
     s32 y;
 } v2i;
 
+typedef struct
+{
+    s32 width;
+    s32 height;
+    s32 *data;
+} bitmap_t;
+
 #endif

@@ -35,6 +35,7 @@ typedef struct game_data_t
     v2i mouse_pos;
     b32 mouse_last_frame;
     b32 mouse_this_frame;
+    bitmap_t bitmap;
 } game_data_t;
 
 #endif // GAME_H

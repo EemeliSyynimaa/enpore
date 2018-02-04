@@ -8,6 +8,83 @@ BITMAPINFO g_bitmap_info;
 game_data_t g_game_data;
 RECT g_window_rect;
 
+static void win32_load_bitmap(bitmap_t *bitmap, s8 *path)
+{
+    HANDLE file;
+
+    file = CreateFile(
+        path,
+        GENERIC_READ,
+        0,
+        0,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        0);
+
+    if (INVALID_HANDLE_VALUE != file)
+    {
+        BITMAPFILEHEADER file_header;
+        BITMAPINFO info;
+
+        ReadFile(
+            file,
+            &file_header,
+            sizeof(BITMAPFILEHEADER),
+            0,
+            0);
+
+        // TODO check header type?
+        ReadFile(
+            file,
+            &info,
+            sizeof(BITMAPINFO),
+            0,
+            0);
+
+        bitmap->width  = info.bmiHeader.biWidth;
+        bitmap->height = info.bmiHeader.biHeight;
+        bitmap->data   = HeapAlloc(GetProcessHeap(), 0, bitmap->width * bitmap->height * sizeof(s32));
+
+        s8 *data = HeapAlloc(GetProcessHeap(), 0, info.bmiHeader.biSizeImage);
+
+        SetFilePointer(
+            file,
+            file_header.bfOffBits,
+            0,
+            FILE_BEGIN);
+
+        ReadFile(
+            file,
+            data,
+            info.bmiHeader.biSizeImage,
+            0,
+            0);
+
+        CloseHandle(file);
+
+        s8 *bitmap_iter = (s8*)bitmap->data;
+        s8 *data_iter = (s8*)data;
+
+        u32 index = 0;
+
+        s32 tempo = 0xff0000;
+        (void)tempo;
+
+        while (index < info.bmiHeader.biSizeImage)
+        {
+            *bitmap_iter++ = *data_iter++; // blue
+            *bitmap_iter++ = *data_iter++; // green
+            *bitmap_iter++ = *data_iter++; // red
+            *bitmap_iter++ = 0; // alpha
+
+            index += 3;
+            // TODO add alpha
+        }
+
+        HeapFree(GetProcessHeap(), 0, data);
+    }
+}
+
 static void win32_resize_backbuffer(render_buffer_t *render_buffer, s32 width, s32 height)
 {
     if (render_buffer)
@@ -136,6 +213,8 @@ s32 CALLBACK WinMain(
             GetClientRect(window, &g_window_rect);
 
             ShowWindow(window, SW_SHOWDEFAULT);
+
+            win32_load_bitmap(&g_game_data.bitmap, "../data/monster.bmp");
 
             game_init(&g_game_data);
 
